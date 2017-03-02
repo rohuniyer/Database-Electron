@@ -1,0 +1,155 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+<style>
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  td, th {
+
+  }
+  th {
+
+  }
+</style>
+</head>
+<body>
+<div id="form-sample"></div>
+<form>
+    INSERT FROM CSV
+    <input type="text" id="csv" placeholder="path to file" />
+    <input type="button" onclick = "insert_csv()" value="Insert from CSV"/>
+
+
+    <input type="button" onclick = "done()" value="Done Inserting"/>
+</form>
+<script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+
+<script>//Put script imports right above this and below other script
+      if (window.module) module = window.module;
+</script>
+
+<script type="text/javascript">
+  const {ipcRenderer} = require('electron');
+  var mysql = require('mysql');
+
+  
+
+  var connection = mysql.createConnection({
+    port: '8889',
+    host: 'localhost',
+    user: 'root',
+    password: 'root',
+    database: 'electron_trial',
+
+  });
+
+  connection.connect(function(err) {
+    if (err){
+      console.log(err.code);
+      console.log(err.fatal);
+    }
+  });
+
+    //Create the form. First get the column names of the table.
+    //Use these to create separate input boxes for each column.
+    var column_names = [];
+
+    $query = 'DESCRIBE first_table';
+
+    connection.query($query, function(err, rows, fields) {
+      if (err){
+        console.log(err);
+        return;
+      }
+      for (var i in rows) {
+        column_names[i] = rows[i].Field;
+        //console.log('Columns: ', column_names[i]);
+      }
+
+      console.log("Successful query");
+
+
+    //Create the forms
+    var x = document.getElementById("form-sample");
+    var createForm = document.createElement('form');
+    x.appendChild(createForm);
+
+    for (var i in column_names) {
+      if (column_names[i] != "Time") { //This is here only for this example. Can be used to skip inserting certain values
+        var newlabel = document.createElement('label');
+        newlabel.innerHTML = column_names[i] + ": ";
+        createForm.appendChild(newlabel);
+
+        var idSet = column_names[i];
+
+        var inputElement = document.createElement('input');
+        inputElement.setAttribute("type", "text");
+        inputElement.setAttribute("id", idSet);
+        createForm.appendChild(inputElement);
+
+
+        var linebreak = document.createElement('br');
+        createForm.appendChild(linebreak);
+      }
+
+    }
+
+    var submitButton = document.createElement('input');
+    submitButton.setAttribute("type", "button");
+    submitButton.setAttribute("value", "Insert");
+    submitButton.setAttribute("onclick", "insert()");
+    createForm.appendChild(submitButton);
+})
+
+  //Closes insert window.
+  function done() {
+    ipcRenderer.send('insert-hide');
+  }
+
+  //Creates full insert query
+  function insert() {
+
+    //Get values from input boxes
+    var size = column_names.length;
+    var inputvalues = [];
+    for (var i = 0; i < size-1; i++) {
+      inputvalues[i] = document.getElementById(column_names[i]).value;
+    }
+
+    //make an object, use that to insert
+    var employee = {};
+    for (var i = 0; i < inputvalues.length; i++) {
+      employee[column_names[i]] = inputvalues[i];
+
+    }
+
+    //Check if year is valid. If not, open error popup.
+
+    //Create query and insert into table
+    $insert = 'INSERT INTO first_table SET ?';
+
+    connection.query($insert, employee, function(err, rows, fields) {
+      if(err){
+        console.log("An error occured");
+        console.log(err);
+        return;
+      }
+      console.log("Insert successful!");
+    });
+
+
+
+    }
+
+
+  //Reads csv and inserts lines accordingly.
+  function insert_csv() {
+
+  }
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+<style>
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+  }
+  th {
+    background-color: #54545E;
+  }
+  tr:nth-child(even) {
+    background-color: #dddddd;
+  }
+
+</style>
+<table id="table" border="1">
+  <tbody>
+
+  </tbody>
+</table>
+
+<body>
+
+<script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+
+<script>//Put script imports right above this and below other script
+      if (window.module) module = window.module;
+</script>
+
+
+    <script type="text/javascript">
+
+
+      const {ipcRenderer} = require('electron');
+      var mysql = require('mysql');
+
+
+
+      var connection = mysql.createConnection({
+        port: '8889',
+        host: 'localhost',
+        user: 'root',
+        password: 'root',
+        database: 'electron_trial',
+
+      });
+
+      connection.connect(function(err) {
+        if (err){
+          console.log(err.code);
+          console.log(err.fatal);
+        }
+      });
+
+      var column_names = [];
+
+      //function columns() {
+        $query = 'DESCRIBE first_table';
+
+        connection.query($query, function(err, rows, fields) {
+          if (err){
+            console.log(err);
+            return;
+          }
+          for (var i in rows) {
+            column_names[i] = rows[i].Field;
+            //console.log('Columns: ', rows[i].Field);
+          }
+
+          console.log("Successful query");
+        })
+
+      //}
+
+      getRows(function(rows){
+        var html = '';
+
+        //columns();
+        console.log(column_names.length);
+        html += '<tr>';
+        for (var i in column_names) {
+          html += '<th>';
+          html += column_names[i];
+          html += '</th>';
+        }
+
+        rows.forEach(function(row){
+          html += '<tr>';
+          for (var i in column_names) {
+            //var variable = column_names[i];
+            //var toUse = "row." + variable;
+            //console.log(toUse);
+            html += '<td>';
+            html += row[Object.keys(row)[i]];
+            html += '</td>';
+          }
+          html += '</tr>';
+        });
+
+        document.querySelector("#table > tbody").innerHTML = html;
+      });
+
+    function getRows(callback) {
+      $query = 'SELECT * FROM first_table LIMIT 100';
+
+      connection.query($query, function(err, rows, fields) {
+        if(err){
+          console.log("An error occured");
+          console.log(err);
+          return;
+        }
+
+        callback(rows);
+
+        console.log("Query successful!");
+      });
+
+    }
+
+
+
+
+</script>
+</body>

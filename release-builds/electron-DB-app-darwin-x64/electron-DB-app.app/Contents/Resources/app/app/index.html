@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+<style>
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+  }
+  th {
+    background-color: #54545E;
+  }
+  tr:nth-child(even) {
+    background-color: #dddddd;
+  }
+
+  .button {
+    background-color: #193D49;
+    border: none;
+    color: white;
+    padding: 30px 30px;
+    text-align: center;
+    font-size: 20px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .button2 {
+    background-color: #9F0312;
+    border: none;
+    color: white;
+    padding: 30px 30px;
+    text-align: center;
+    font-size: 20px;
+    cursor: pointer;
+    border-radius: 8px;
+  }
+
+</style>
+</head>
+
+<form>
+    <input type="button" class="button" onclick = "insert()" value="Insert"/>
+    <input type="button" class="button" id="action-btn" value="Get Table View"/>
+    <input type="button" class="button" onclick="columns()" value="Get Columns"/>
+    <input type="button2" class="button2" onclick = "done()" value="Close Connection"/>
+
+</form>
+  <table id="table" border="1">
+    <tbody>
+
+    </tbody>
+  </table>
+
+<body>
+
+<script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+
+<script>//Put script imports right above this and below other script
+      if (window.module) module = window.module;
+</script>
+
+    <script type="text/javascript">
+
+
+    //THIS PAGE WILL CHANGE
+    //INITIAL PAGE SHOULD HAVE A COUPLE OPTIONS.
+    //LIKE UPDATE TABLE, VIEW TABLE
+    //THEN AFTER CLICKING THOSE, WE HAVE OUR OTHER PAGES
+      const {ipcRenderer} = require('electron');
+      var mysql = require('mysql');
+
+      
+
+      var connection = mysql.createConnection({
+        port: '8889',
+        host: 'localhost',
+        user: 'root',
+        password: 'root',
+        database: 'electron_trial',
+
+      });
+
+      connection.connect(function(err) {
+        if (err){
+          console.log(err.code);
+          console.log(err.fatal);
+        }
+      });
+
+
+      //GET COLUMN NAMES FOR TABLE
+      //THIS IS NOT COMPLETELY DONE; FIGURE OUT HOW TO MAKE THIS MORE USABLE
+      //WITH MULTIPLE DATABASES
+      function columns() {
+        $query = 'DESCRIBE first_table';
+
+        connection.query($query, function(err, rows, fields) {
+          if (err){
+            console.log(err);
+            return;
+          }
+          for (var i in rows) {
+            console.log('Columns: ', rows[i].Field);
+          }
+
+          console.log("Successful query");
+        })
+
+      }
+
+      //INSERT VALUES FROM TEXT BOXES INTO OUR TABLE
+      //CALL TABLEVIEW AFTER TO PRINT OUT TABLE
+      function insert() {
+        ipcRenderer.on('insert-show-reply', function(event) {
+          //console.log("did it work?");
+        })
+        ipcRenderer.send('insert-show');
+      }
+
+      //TO DO LIST
+      //1)PRINT OUT TABLE TO SEE WHAT ITS LIKE
+
+    /*  function table() {
+        ipcRenderer.on('table-show-reply', function(event) {
+
+        })
+        ipcRenderer.send('table-show');
+      }*/
+
+      function el(selector) {
+        return document.getElementById(selector);
+      }
+
+      el('action-btn').addEventListener('click', function(){
+        ipcRenderer.on('table-show-reply', function(event) {
+
+        })
+        ipcRenderer.send('table-show');
+      },false);
+
+      //2) BE ABLE TO CHOOSE SPECIFIC TABLES IN database
+      //3) ADD IN COLUMNS TO DATABASE FROM HERE
+      //4) INVALID INPUTS
+      //5) MAKE IT LOOK NICE
+      //6) POSSIBLY ADD IN SOME GRAPHS
+      function done() {
+        connection.end(function(){
+          console.log("connection closed");
+        });
+      }
+
+
+    </script>
+
+</body>
+</html>

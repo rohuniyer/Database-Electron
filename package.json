@@ -1,12 +1,17 @@
 {
   "name": "electron-DB-app",
-  "version": "1.4.15",
+  "version": "0.1.0",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-packager . dbApp --platform=all --arch=all --version=1.4.15"
+    "package-mac": "electron-packager . --overwrite --platform=darwin --arch=x64 --icon=assets/icons/mac/database.icns --prune=false --out=release-builds",
+    "package-win": "electron-packager . --overwrite --asar=true --platform=win32 --arch=ia32 --icon=assets/icons/win/database.ico --prune=true --out=release-builds --version-string.CompanyName='CE' --version-string.FileDescription='Database Update App' --version-string.ProductName='Database Update App'",
+    "package-linux": "electron-packager . --overwrite --asar=true --platform=linux --arch=x64 --icon=assets/icons/png/database.png --prune=true --out=release-builds",
+    "create-installer-mac": "electron-installer-dmg ./release-builds/electron-DB-app-darwin-x64/electron-DB-app.app/Contents/MacOS/electron-DB-app DB_app --out=release-builds --overwrite"
   },
   "devDependencies": {
+    "electron": "^1.4.15",
+    "electron-installer-dmg": "^0.2.0",
     "electron-packager": "^8.5.2"
   }
 }
