@@ -4,7 +4,7 @@
 
 $row = 1;
 
-if (($file = fopen("24443.csv", "r")) !== FALSE) { //Put in your own spreadsheet here
+if (($file = fopen("AdimabSequences.csv", "r")) !== FALSE) { //Put in your own spreadsheet here
   while (($data = fgetcsv($file)) !== FALSE) {
     $num = count($data); //Counting number of columns in current row (should be 3)
     //echo "line $row: \xA"; //This is only to make sure it is reading all the lines
